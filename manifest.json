@@ -1,0 +1,16 @@
+{
+  "name": "docker-twylt-tool",
+  "version": "0.3.0",
+  "tools": [
+    {
+      "name": "docker_run",
+      "entrypoint": "tools/docker_run/tool.py",
+      "bootstrap": "tools/docker_run/run.py"
+    },
+    {
+      "name": "docker_images",
+      "entrypoint": "tools/docker_images/tool.py",
+      "bootstrap": "tools/docker_images/run.py"
+    }
+  ]
+}

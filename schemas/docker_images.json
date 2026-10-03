@@ -1,0 +1,156 @@
+{
+  "format_version": "1.8",
+  "name": "docker_images",
+  "version": "0.3.0",
+  "description": "List local tagged Docker/Podman images with sorted tags, byte sizes, creation dates and pagination. Never pulls images or starts containers.",
+  "requirements": {
+    "tool": "pip",
+    "format": "requirements.txt",
+    "content": "twylt==1.0.0\npydantic>=2,<3\ndocker==7.1.0\n"
+  },
+  "inputSchema": {
+    "additionalProperties": false,
+    "properties": {
+      "offset": {
+        "default": 0,
+        "description": "Zero-based image offset after sorting by first tag, then image ID.",
+        "minimum": 0,
+        "title": "Offset",
+        "type": "integer"
+      },
+      "limit": {
+        "default": 100,
+        "description": "Maximum images in this response, not number of tags.",
+        "maximum": 1000,
+        "minimum": 1,
+        "title": "Limit",
+        "type": "integer"
+      }
+    },
+    "title": "ImagesInputTWYLTStrict",
+    "type": "object",
+    "$id": "docker_images.input",
+    "x-schema-version": "1.0.0"
+  },
+  "outputSchema": {
+    "$defs": {
+      "ImageRecordTWYLTStrict": {
+        "additionalProperties": false,
+        "properties": {
+          "image_id": {
+            "title": "Image Id",
+            "type": "string"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Tags",
+            "type": "array"
+          },
+          "size_bytes": {
+            "minimum": 0,
+            "title": "Size Bytes",
+            "type": "integer"
+          },
+          "created": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Created"
+          }
+        },
+        "required": [
+          "image_id",
+          "tags",
+          "size_bytes"
+        ],
+        "title": "ImageRecordTWYLTStrict",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "ok": {
+        "title": "Ok",
+        "type": "boolean"
+      },
+      "images": {
+        "items": {
+          "$ref": "#/$defs/ImageRecordTWYLTStrict"
+        },
+        "title": "Images",
+        "type": "array"
+      },
+      "total": {
+        "default": 0,
+        "title": "Total",
+        "type": "integer"
+      },
+      "offset": {
+        "title": "Offset",
+        "type": "integer"
+      },
+      "limit": {
+        "title": "Limit",
+        "type": "integer"
+      },
+      "next_offset": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Next Offset"
+      },
+      "error": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Error"
+      }
+    },
+    "required": [
+      "ok",
+      "offset",
+      "limit"
+    ],
+    "title": "ImagesOutputTWYLTStrict",
+    "type": "object",
+    "$id": "docker_images.output",
+    "x-schema-version": "1.0.0"
+  },
+  "few_shots": [
+    {
+      "input": {
+        "offset": 0,
+        "limit": 100
+      },
+      "output": {
+        "ok": true,
+        "images": [],
+        "total": 0,
+        "offset": 0,
+        "limit": 100,
+        "next_offset": null,
+        "error": null
+      }
+    }
+  ]
+}

@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:twylt:workspace-incident:1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "event",
+    "schema_version",
+    "timestamp",
+    "incident_id",
+    "tool",
+    "pid",
+    "action",
+    "code"
+  ],
+  "properties": {
+    "event": {
+      "const": "workspace_incident"
+    },
+    "schema_version": {
+      "const": "1.0"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "incident_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "tool": {
+      "type": "string"
+    },
+    "pid": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "action": {
+      "const": "deny"
+    },
+    "code": {
+      "enum": [
+        "docker_capacity_configuration_mismatch",
+        "docker_cleanup_failed",
+        "docker_configuration_invalid",
+        "docker_expired_cleanup_failed",
+        "docker_image_forbidden",
+        "docker_image_volume_requires_bind",
+        "docker_local_linux_required",
+        "docker_mount_overlap",
+        "docker_mount_target_forbidden",
+        "docker_network_forbidden",
+        "docker_non_bind_mount_forbidden",
+        "docker_pull_forbidden",
+        "docker_registry_forbidden",
+        "docker_resource_limits_unavailable",
+        "docker_timeout_exceeds_maximum",
+        "docker_watchdog_cleanup_failed",
+        "filesystem_root_forbidden",
+        "git_config_forbidden",
+        "git_indirect_worktree_forbidden",
+        "git_local_remote_outside_workspace",
+        "git_metadata_path_forbidden",
+        "git_remote_forbidden",
+        "git_remote_not_configured",
+        "git_storage_redirection_forbidden",
+        "git_symlink_tree_forbidden",
+        "hardlink_forbidden",
+        "incident_log_inside_workspace",
+        "incident_log_unavailable",
+        "invalid_incident_log",
+        "invalid_path",
+        "invalid_path_syntax",
+        "invalid_repository_relative_path",
+        "invalid_workspace_root",
+        "mount_boundary_forbidden",
+        "path_outside_workspace",
+        "special_file_forbidden",
+        "symlink_forbidden",
+        "transport_cwd_outside_workspace",
+        "workspace_not_configured",
+        "workspace_root_mutation_forbidden"
+      ]
+    },
+    "original_code": {
+      "enum": [
+        "docker_capacity_configuration_mismatch",
+        "docker_cleanup_failed",
+        "docker_configuration_invalid",
+        "docker_expired_cleanup_failed",
+        "docker_image_forbidden",
+        "docker_image_volume_requires_bind",
+        "docker_local_linux_required",
+        "docker_mount_overlap",
+        "docker_mount_target_forbidden",
+        "docker_network_forbidden",
+        "docker_non_bind_mount_forbidden",
+        "docker_pull_forbidden",
+        "docker_registry_forbidden",
+        "docker_resource_limits_unavailable",
+        "docker_timeout_exceeds_maximum",
+        "docker_watchdog_cleanup_failed",
+        "filesystem_root_forbidden",
+        "git_config_forbidden",
+        "git_indirect_worktree_forbidden",
+        "git_local_remote_outside_workspace",
+        "git_metadata_path_forbidden",
+        "git_remote_forbidden",
+        "git_remote_not_configured",
+        "git_storage_redirection_forbidden",
+        "git_symlink_tree_forbidden",
+        "hardlink_forbidden",
+        "incident_log_inside_workspace",
+        "incident_log_unavailable",
+        "invalid_incident_log",
+        "invalid_path",
+        "invalid_path_syntax",
+        "invalid_repository_relative_path",
+        "invalid_workspace_root",
+        "mount_boundary_forbidden",
+        "path_outside_workspace",
+        "special_file_forbidden",
+        "symlink_forbidden",
+        "transport_cwd_outside_workspace",
+        "workspace_not_configured",
+        "workspace_root_mutation_forbidden"
+      ]
+    },
+    "requested_path": {
+      "type": "string",
+      "maxLength": 1024
+    }
+  }
+}

@@ -1,0 +1,290 @@
+{
+  "format_version": "1.8",
+  "name": "docker_run",
+  "version": "0.3.0",
+  "description": "Run an application in a disposable resource-limited Linux Docker/Podman container, with scoped host bind mounts and daemon-wide concurrency slots.",
+  "requirements": {
+    "tool": "pip",
+    "format": "requirements.txt",
+    "content": "twylt==1.0.0\npydantic>=2,<3\ndocker==7.1.0\n"
+  },
+  "inputSchema": {
+    "$defs": {
+      "BindVolumeTWYLTStrict": {
+        "additionalProperties": false,
+        "properties": {
+          "source": {
+            "description": "Virtual host path within TWYLT_WORKSPACE_ROOT; must already exist.",
+            "minLength": 1,
+            "title": "Source",
+            "type": "string"
+          },
+          "target": {
+            "description": "Absolute POSIX path inside the container.",
+            "minLength": 1,
+            "title": "Target",
+            "type": "string"
+          },
+          "read_only": {
+            "default": true,
+            "description": "Read-only bind mount by default; false allows persistent host writes.",
+            "title": "Read Only",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "source",
+          "target"
+        ],
+        "title": "BindVolumeTWYLTStrict",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "image": {
+        "description": "Image relative to configured registry prefix, or a fully qualified image under that prefix.",
+        "minLength": 1,
+        "title": "Image",
+        "type": "string"
+      },
+      "command": {
+        "anyOf": [
+          {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Container CMD argv. No implicit shell; null inherits image CMD.",
+        "title": "Command"
+      },
+      "entrypoint": {
+        "anyOf": [
+          {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Container ENTRYPOINT argv. null inherits image ENTRYPOINT, [] clears it.",
+        "title": "Entrypoint"
+      },
+      "environment": {
+        "additionalProperties": {
+          "type": "string"
+        },
+        "description": "Environment variables inside the container only. Host environment is not forwarded.",
+        "title": "Environment",
+        "type": "object"
+      },
+      "volumes": {
+        "description": "Host bind mounts only; no named or anonymous Docker volumes.",
+        "items": {
+          "$ref": "#/$defs/BindVolumeTWYLTStrict"
+        },
+        "maxItems": 32,
+        "title": "Volumes",
+        "type": "array"
+      },
+      "network": {
+        "default": "isolated",
+        "description": "isolated maps to none; enabled maps to bridge, never host networking.",
+        "enum": [
+          "isolated",
+          "enabled"
+        ],
+        "title": "Network",
+        "type": "string"
+      },
+      "timeout": {
+        "anyOf": [
+          {
+            "maximum": 86400,
+            "minimum": 1,
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Execution budget in seconds, including container creation/start. Default min(60, configured maximum).",
+        "title": "Timeout"
+      }
+    },
+    "required": [
+      "image"
+    ],
+    "title": "InputTWYLTStrict",
+    "type": "object",
+    "$id": "docker_run.input",
+    "x-schema-version": "1.0.0"
+  },
+  "outputSchema": {
+    "additionalProperties": false,
+    "properties": {
+      "ok": {
+        "title": "Ok",
+        "type": "boolean"
+      },
+      "status": {
+        "enum": [
+          "succeeded",
+          "failed",
+          "timed_out",
+          "busy",
+          "error"
+        ],
+        "title": "Status",
+        "type": "string"
+      },
+      "image": {
+        "title": "Image",
+        "type": "string"
+      },
+      "image_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Image Id"
+      },
+      "container_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Container Id"
+      },
+      "exit_code": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Exit Code"
+      },
+      "container_exit_code": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Container Exit Code"
+      },
+      "stdout": {
+        "default": "",
+        "title": "Stdout",
+        "type": "string"
+      },
+      "stderr": {
+        "default": "",
+        "title": "Stderr",
+        "type": "string"
+      },
+      "stdout_truncated": {
+        "default": false,
+        "title": "Stdout Truncated",
+        "type": "boolean"
+      },
+      "stderr_truncated": {
+        "default": false,
+        "title": "Stderr Truncated",
+        "type": "boolean"
+      },
+      "timed_out": {
+        "default": false,
+        "title": "Timed Out",
+        "type": "boolean"
+      },
+      "oom_killed": {
+        "default": false,
+        "title": "Oom Killed",
+        "type": "boolean"
+      },
+      "cleanup_ok": {
+        "default": true,
+        "title": "Cleanup Ok",
+        "type": "boolean"
+      },
+      "duration_seconds": {
+        "default": 0.0,
+        "title": "Duration Seconds",
+        "type": "number"
+      },
+      "error": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Error"
+      }
+    },
+    "required": [
+      "ok",
+      "status",
+      "image"
+    ],
+    "title": "OutputTWYLTStrict",
+    "type": "object",
+    "$id": "docker_run.output",
+    "x-schema-version": "1.0.0"
+  },
+  "few_shots": [
+    {
+      "input": {
+        "image": "alpine:3.20",
+        "command": [
+          "echo",
+          "hello"
+        ],
+        "network": "isolated",
+        "timeout": 10
+      },
+      "output": {
+        "ok": true,
+        "status": "succeeded",
+        "image": "docker.io/library/alpine:3.20",
+        "stdout": "hello\n",
+        "cleanup_ok": true,
+        "exit_code": 0,
+        "container_exit_code": 0
+      }
+    }
+  ]
+}
