@@ -1,3 +1,11 @@
+# 0.4.0 — 2026-10-08
+
+- Replace copied workspace/transport checks with TWYLT >=1.1.1 APIs.
+- Move shared business helpers into shared/docker_common; keep tool-only code with its tool.
+- Remove source-copy generation; deploy source tree without building a Python pack.
+- Support optional nested transport cwd outside workspace and common network policy.
+- Preserve existing scenarios, add actual builder launcher checks, refresh schemas and ADR.
+
 # Changelog
 
 ## 0.3.0 — 2026-10-02

@@ -1,6 +1,6 @@
 {
-  "name": "docker-twylt-tool",
-  "version": "0.3.0",
+  "name": "twylt-pack-docker",
+  "version": "0.4.0",
   "tools": [
     {
       "name": "docker_run",

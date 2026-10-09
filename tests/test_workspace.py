@@ -8,9 +8,7 @@ import sys
 import pytest
 
 BASE = Path(__file__).resolve().parents[1]
-spec = importlib.util.spec_from_file_location('policy_under_test', BASE/'src/workspace.py')
-policy = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(policy)
+from twylt import guardrails as policy
 
 @pytest.fixture
 def configured(tmp_path, monkeypatch):
@@ -116,7 +114,7 @@ def test_root_mutation_and_tree_preflight(configured, tmp_path):
 def test_parallel_incident_append(configured):
     root, log = configured
     code = "import sys; sys.path.insert(0,sys.argv[1]); from workspace import Workspace, WorkspaceDenied\ntry: Workspace('parallel').resolve('../outside')\nexcept WorkspaceDenied: pass"
-    processes=[subprocess.Popen([sys.executable,'-c',code,str(BASE/'src')],stdout=subprocess.PIPE,stderr=subprocess.PIPE) for _ in range(8)]
+    processes=[subprocess.Popen([sys.executable,'-c',code,str(BASE/'tests/legacy')],stdout=subprocess.PIPE,stderr=subprocess.PIPE) for _ in range(8)]
     for p in processes:
         out, err=p.communicate(timeout=10)
         assert p.returncode==0 and not out and not err

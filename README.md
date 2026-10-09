@@ -1,4 +1,29 @@
-# Docker / Podman TWYLT Tool 0.3.0
+# Docker / Podman TWYLT Tool 0.4.0
+
+## Миграция 0.4.0
+
+Пак основан на последней версии GitHub, проверенной 2026-10-08.
+TWYLT >=1.1.1 устанавливается как библиотека; сам этот пак не собирается и
+не устанавливается через pip. Установите requirements.txt и сохраняйте
+каталоги tools/ и shared/docker_common/ вместе. Если новая версия TWYLT ещё не доступна
+в вашем Python-индексе, сначала установите её из исходников или wheel.
+
+Общие guardrails не копируются в инструменты: используются twylt.guardrails.
+Каждый тул добавляет shared/ в sys.path относительно __file__, без зависимости
+от cwd и без PYTHONPATH. Builder сканирует только tools/; его launcher требует
+доступности исходного дерева. Разные версии пака запускайте в отдельных процессах.
+
+Guardrails выключены по умолчанию. Для прежней политики задайте TWYLT_GUARDRAILS=1
+и TWYLT_WORKSPACE_ROOT. TWYLT_ALLOWED_CWD опционально разрешает отдельный корень
+транспорта input.json/output.json и его подкаталоги; бизнес-доступ он не расширяет.
+Отказы guardrails возвращают код 6; валидация — 2, бизнес-ошибка — 5.
+При выключенной политике и отсутствии workspace используются обычные пути хоста;
+при указанном workspace сохраняется виртуальная семантика путей.
+Механизмы TWYLT контролируют типовое использование, а произвольный Python/подпроцессы
+контролируются ОС. Не рассматривайте эти проверки как файловую изоляцию.
+
+TWYLT_DISABLE_NETWORK=1 при включённых guardrails запрещает загрузку образа и запуск с сетью. TWYLT_DOCKER_DISABLE_NETWORK сохранён как отдельный запрет сети дочернего контейнера; он не запрещает локальный API daemon. Ресурсные лимиты, registry, bind targets и очистка — бизнес-ограничения и продолжают действовать. Watchdog импортирует TWYLT, без встроенной копии guardrails.
+
 
 `docker_run` запускает приложение в одноразовом Linux-контейнере, возвращает
 stdout/stderr и код завершения, затем удаляет контейнер. Bind mounts разрешены
@@ -91,7 +116,10 @@ live-тесты на целевом хосте. Источники и грани
 
 | Переменная | Default | Назначение |
 |---|---|---|
-| `TWYLT_WORKSPACE_ROOT` | обязательно | Абсолютный физический корень разрешённых host bind mounts |
+| `TWYLT_GUARDRAILS` | `0` | Включить общую политику TWYLT; в toolhub-images включена по умолчанию |
+| `TWYLT_ALLOWED_CWD` | не задан | Дополнительный корень транспорта и его подкаталогов |
+| `TWYLT_DISABLE_NETWORK` | `0` | Общий запрет сети при guardrails=1, включая pull |
+| `TWYLT_WORKSPACE_ROOT` | при guardrails=1 | Абсолютный физический корень разрешённых host bind mounts |
 | `TWYLT_INCIDENT_LOG` | stderr | JSONL-файл вне области; рекомендуется для сохранения событий watchdog |
 | `TWYLT_DOCKER_DISABLE_NETWORK` | `false` | Запретить сеть приложения: true/false или 1/0; enabled отклоняется с инцидентом |
 | `TWYLT_DOCKER_ALLOW_PULL` | `false` | Разрешить скачивание отсутствующего образа: true/false или 1/0 |
@@ -109,6 +137,7 @@ live-тесты на целевом хосте. Источники и грани
 
 ```bash
 mkdir -p /srv/agent/workspace /srv/agent/logs
+export TWYLT_GUARDRAILS=1
 export TWYLT_WORKSPACE_ROOT=/srv/agent/workspace
 export TWYLT_INCIDENT_LOG=/srv/agent/logs/docker-incidents.jsonl
 export TWYLT_DOCKER_ALLOW_PULL=true
@@ -340,7 +369,7 @@ stdout/stderr самого приложения возвращаются как 
 
 ## Журнал
 
-Общая политика `src/workspace.py` взята без изменений из FS-пака. Инциденты JSONL:
+Общая политика импортируется из `twylt.guardrails`; собственной копии workspace.py нет. Инциденты JSONL:
 нарушения путей, registry, pull, timeout maximum, конфигурации ресурсов, mount
 ограничений и ошибки очистки. Успешные запуски, busy, ненулевые коды приложения и
 обычный runtime timeout отдельно в аудит не добавляются — они есть в результате.
@@ -352,24 +381,25 @@ stdout/stderr самого приложения возвращаются как 
 поэтому без рабочего файлового sink его сообщения не сохраняются. Ошибки открытия
 настроенного журнала отклоняют основной запрос до работы с Docker.
 
-Файловый транспорт TWYLT input.json/output.json разрешён только при cwd внутри
-области. CLI JSON/stdin работают из любого cwd. Describe не требует Docker daemon
+При включённых guardrails файловый транспорт TWYLT разрешён при cwd внутри
+workspace или TWYLT_ALLOWED_CWD, включая подкаталоги. CLI JSON/stdin работают из любого cwd. Describe не требует Docker daemon
 и конфигурации области. При JSONL в stderr перед TWYLT-ошибкой может быть отдельная
 строка события. Полная схема инцидента — `schemas/workspace-incident.schema.json`.
 
 ## ToolHub / Toolpack-builder
 
-Сканировать `tools/**/tool.py`: два самодостаточных инструмента: `docker_run` и `docker_images`.
-Не включать run.py одновременно. Каждый скрипт содержит shared policy, runtime и guardian
-код; импорт соседних файлов при запуске не требуется. Требования Python объявлены
-в TWYLT metadata. Docker socket, корень и env-настройки должен предоставить runner.
+Сканировать только tools/**/tool.py: docker_run и docker_images.
+Не включать run.py одновременно. Каждый тул содержит свой контракт и бизнес-логику;
+общие настройки импортируются из shared/docker_common, guardrails — из TWYLT.
+Требуется весь tools/shared source tree. Guardian запускается отдельным Python
+процессом и импортирует TWYLT; встроенной копии политики нет. Docker socket, корень
+и env-настройки предоставляет runner.
 GUI-импорт в ToolHub здесь не проверялся.
 
 ## Тесты и разработка
 
 ```bash
 python -m pip install -r requirements-dev.txt
-python scripts/build_tools.py
 python scripts/export_schemas.py
 python -m pytest -q
 ```
@@ -413,3 +443,14 @@ TWYLT_CONTAINER_ENGINE=podman TWYLT_DOCKER_LIVE_TESTS=1 python -m pytest -q test
 Тесты проверяют stdout/stderr, exit code, таймаут/очистку, запись bind mount,
 список образов, фактические CPU/RAM/swap настройки cgroup v2 и только loopback
 при isolated. Эта же suite запускается с TWYLT_CONTAINER_ENGINE=docker.
+
+## Интеграция с toolhub-images
+
+После публикации обновите Git ref пака в своём domain YAML и используйте
+update: always для замены старого toolset. Сохраняйте весь tools/shared tree.
+Образы должны содержать TWYLT >=1.1.1 и внешние зависимости из requirements.txt;
+установка самого пака не требуется. Для filesystem обновите соответствующий
+source pin в sources.lock.json images, затем пересоберите образы.
+Тулы теперь используют общий транспорт и поддерживают TWYLT_ALLOWED_CWD;
+legacy override TOOLHUB_RUN_ROOT внутри workspace для этих новых паков больше не нужен.
+Не удаляйте собственные настройки data/workspace при обновлении domain.

@@ -1,12 +1,12 @@
 {
   "format_version": "1.8",
   "name": "docker_run",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Run an application in a disposable resource-limited Linux Docker/Podman container, with scoped host bind mounts and daemon-wide concurrency slots.",
   "requirements": {
     "tool": "pip",
     "format": "requirements.txt",
-    "content": "twylt==1.0.0\npydantic>=2,<3\ndocker==7.1.0\n"
+    "content": "twylt>=1.1.1,<2\npydantic>=2,<3\ndocker==7.1.0\n"
   },
   "inputSchema": {
     "$defs": {

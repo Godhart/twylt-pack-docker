@@ -9,7 +9,7 @@ from concurrent.futures import ThreadPoolExecutor
 import pytest
 import requests
 BASE=Path(__file__).resolve().parents[1]
-sys.path.insert(0,str(BASE/'src'))
+sys.path.insert(0,str(BASE/'tests/legacy'))
 import runtime as r
 from workspace import Workspace,WorkspaceDenied
 

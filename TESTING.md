@@ -1,3 +1,25 @@
+# Testing docker 0.4.0
+
+Python 3.12, TWYLT 1.1.1, 2026-10-08: 110 passed. 6 daemon tests skipped (Docker/Podman unavailable).
+All earlier behavioral scenarios are preserved. Policy tests now use TWYLT itself;
+assertions were updated for code 6 and the centralized transport incident code.
+Copied source packs are scanned by builder 0.4.1 and their actual generated
+launcher runs in a nested cwd outside workspace using file transport.
+Filesystem and Git exercise real operations; Docker tests use mock daemon APIs.
+No pack Python distribution is installed. Whole tools/shared tree is required.
+
+Base: https://github.com/Godhart/twylt-pack-docker, commit 3d7ded8276262590885c57317351d1cc4c6d9bef.
+Archive includes a patch against this fresh GitHub checkout and SHA256SUMS.
+
+```bash
+python -m pip install -r requirements.txt
+# Integration tests also need toolpack-builder 0.4.1.
+python -m pytest -q tests
+python scripts/export_schemas.py
+```
+
+## Previous release results (historical)
+
 # Validation — Docker TWYLT Tool 0.3.0
 
 2026-10-02, Linux, Python 3.12, TWYLT 1.0.0, Docker SDK 7.1.0.

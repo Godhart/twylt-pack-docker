@@ -9,7 +9,7 @@ import time
 from types import SimpleNamespace
 import pytest
 BASE=Path(__file__).resolve().parents[1]
-sys.path.insert(0,str(BASE/'src'))
+sys.path.insert(0,str(BASE/'tests/legacy'))
 import runtime as r
 
 @pytest.fixture
@@ -61,7 +61,7 @@ g=r.Watchdog(SimpleNamespace(host='unix:///fake'),SimpleNamespace(api=SimpleName
 print(g.process.pid,flush=True)
 time.sleep(60)
 '''
-    caller=subprocess.Popen([sys.executable,'-c',code,str(BASE/'src'),str(fakepath)],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True)
+    caller=subprocess.Popen([sys.executable,'-c',code,str(BASE/'tests/legacy'),str(fakepath)],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True)
     ready,_,_=select.select([caller.stdout],[],[],10)
     assert ready
     guardian_pid=int(caller.stdout.readline())
